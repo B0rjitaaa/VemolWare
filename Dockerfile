@@ -33,19 +33,20 @@ RUN apt-get -yqq update \
     && apt-get clean
 
 # Download set-toolkit
-RUN git clone https://github.com/trustedsec/social-engineer-toolkit.git social-engineer-toolkit
-RUN chmod +x social-engineer-toolkit/setoolkit
+RUN git clone https://github.com/trustedsec/social-engineer-toolkit.git /etc/social-engineer-toolkit
+RUN chmod +x /etc/social-engineer-toolkit/setoolkit
 RUN pip install pexpect pycrypto requests pyopenssl pefile impacket qrcode pillow
 
 # Download postfix
-RUN apt-get install -yqq postfix
+RUN apt-get install -yqq postfix \
+    && apt-get -yqq mailutils
 RUN git clone https://github.com/galkan/sees
 RUN touch /var/log/mail.log
+RUN service postfix start
 
 CMD ["bash"]
 
 # docker run --name kali_container_1 -v ~/Development/kali_docker/code:/code -i -t my_kali  /bin/bash
 # docker run --name kali_container_2 -v ~/Development/kali_docker/code:/code -i -t my_kali_postfix  /bin/bash
 # python sees.py --text --config_file config/sees.cfg --mail_user config/mail.user  --html_file data/html.text -v
-
 
