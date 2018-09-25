@@ -16,7 +16,6 @@ STAGES = {
     'stage4': 4,
 }
 
-
 def check_stage(log_file, ip_addr):
     with open(log_file) as f:
         content = f.readlines()
@@ -27,7 +26,7 @@ def check_meterpreter_session(ip_addr):
     return len([x for x in psutil.net_connections() if x.laddr.port == 4444 and x.raddr.ip == ip_addr]) > 0
 
 
-def calculate_stage():
+def calculate_points():
     input_file = csv.DictReader(open('log.csv', 'r'))
     out = [ row for row in input_file ]
     for line in out:
@@ -64,10 +63,9 @@ def phishing_server():
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    
     return render_template(
         'dashboard.html', 
-        response=calculate_stage(), 
+        response=calculate_points(), 
         name='dashboard'
     )
 
