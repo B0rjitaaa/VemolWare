@@ -1,0 +1,103 @@
+<html>
+
+<head>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body{
+            background: -webkit-linear-gradient(left, #2f9b3d, #a2f0af);
+        }
+        .contact-form{
+            background: #fff;
+            margin-top: 10%;
+            margin-bottom: 5%;
+            width: 70%;
+        }
+        .contact-form .form-control{
+            border-radius:1rem;
+        }
+        .contact-image{
+            text-align: center;
+        }
+        .contact-image img{
+            border-radius: 6rem;
+            width: 11%;
+            margin-top: -3%;
+            transform: rotate(29deg);
+        }
+        .contact-form form{
+            padding: 14%;
+        }
+        .contact-form form .row{
+            margin-bottom: -7%;
+        }
+        .contact-form h3{
+            margin-bottom: 8%;
+            margin-top: -10%;
+            text-align: center;
+            color: #0062cc;
+        }
+        .contact-form .btnContact {
+            width: 50%;
+            border: none;
+            border-radius: 1rem;
+            padding: 1.5%;
+            background: #dc3545;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+        .btnContactSubmit
+        {
+            width: 50%;
+            border-radius: 1rem;
+            padding: 1.5%;
+            color: #fff;
+            background-color: #0062cc;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>    
+    <div class="container contact-form">
+        <div class="contact-image">
+            <img src="https://image.ibb.co/kUagtU/rocket_contact.png" alt="rocket_contact"/>
+        </div>
+        <form method="post" action="/config">
+            <h3>Lauching area</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <select name="" class="form-control">
+                            <option value="1">eth0</option>
+                            <option value="2">en0</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="local-ip" class="form-control" required="true" placeholder="Local IP *" />
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="target-domain" class="form-control" required="true" placeholder="Target domain *" />
+                    </div>
+                    
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <textarea name="email-address" class="form-control" required="true" placeholder="Comma separated email address *" 
+                        style="width: 100%; height: 150px;"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group" style="text-align:center">
+                        <input type="submit" name="btnSubmit" class="btnContact" value="Save configuration" />
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+</html>

@@ -76,11 +76,23 @@ def config():
         local_ip = request.form.get('local-ip')
         target_domain = request.form.get('target-domain')
         email_address = request.form.get('email-address')
+        email_address = email_address.split(',')
+
+        # TODO: validation with error message
 
     return render_template(
         'config.html',
         response=[],
         name='config'
+    )
+
+
+@app.route('/start', methods=['GET', 'POST'])
+def start():
+    return render_template(
+        'start.html',
+        response=[],
+        name='start'
     )
 
 
