@@ -61,7 +61,7 @@ def phishing_server():
     return render_template(target, name='index')
 
 
-@app.route('/dashboard', methods=['GET'])
+@app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     return render_template(
         'dashboard.html', 
@@ -70,5 +70,19 @@ def dashboard():
     )
 
 
+@app.route('/config', methods=['GET', 'POST'])
+def config():
+    if request.method == 'POST':
+        local_ip = request.form.get('local-ip')
+        target_domain = request.form.get('target-domain')
+        email_address = request.form.get('email-address')
+
+    return render_template(
+        'config.html',
+        response=[],
+        name='config'
+    )
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='80')
+    app.run(host='0.0.0.0', port='80', debug=True)

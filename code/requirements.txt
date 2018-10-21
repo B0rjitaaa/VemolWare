@@ -2,4 +2,6 @@ Flask==1.0.2
 netifaces==0.10.7
 colorama
 argparse
-psutil
+kamene
+psutils
+ipdb
