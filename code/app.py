@@ -3,7 +3,10 @@ import json
 import csv
 import psutil
 from datetime import datetime
+import ipaddress
+from email_validator import validate_email, EmailNotValidError
 from flask import Flask, request, render_template, redirect
+
 
 app = Flask(__name__)
 
@@ -36,6 +39,23 @@ def calculate_points():
                 points += STAGES[stage]
         line.update({'points': points})
     return out
+
+
+def validate(local_ip, target_domain, email_address):
+    errors = []
+
+    for email in email_address:
+        try:
+            validate_email(email)
+        except EmailNotValidError:
+            errors.append(f'Email is not valid: {email}')
+
+    try:
+        ipaddress.ip_address(local_ip)
+    except ValueError:
+        errors.append('Local IP address is not a valid format')
+    
+    return errors
         
 
 @app.route('/', methods=['GET', 'POST'])
@@ -72,17 +92,24 @@ def dashboard():
 
 @app.route('/config', methods=['GET', 'POST'])
 def config():
+    errors = []
     if request.method == 'POST':
         local_ip = request.form.get('local-ip')
+        iface = request.form.get('iface')
         target_domain = request.form.get('target-domain')
         email_address = request.form.get('email-address')
         email_address = email_address.split(',')
 
-        # TODO: validation with error message
-
+        errors = validate(local_ip, target_domain, email_address)
+        if not errors:
+            return render_template(
+            'start.html',
+            response=errors,
+            name='config'
+        )
     return render_template(
         'config.html',
-        response=[],
+        response=errors,
         name='config'
     )
 

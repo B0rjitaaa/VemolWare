@@ -5,3 +5,4 @@ argparse
 kamene
 psutils
 ipdb
+email_validator
