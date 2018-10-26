@@ -9,6 +9,7 @@ from flask import Flask, request, render_template, redirect
 
 
 app = Flask(__name__)
+app.config['STATIC_FOLDER'] = 'static'
 
 FIELDNAMES = ['ip_addr', 'email','password','user_agent','platform', 'date', 'stage1','stage2', 'stage3', 'stage4']
 
@@ -107,6 +108,18 @@ def config():
         name='config'
     )
 
+
+@app.route('/email', methods=['GET', 'POST'])
+def email():
+    errors = []
+    if request.method == 'POST':
+        pass
+    
+    return render_template(
+        'email.html',
+        response=[],
+        name='email'
+    )
 
 @app.route('/start', methods=['GET', 'POST'])
 def start():
