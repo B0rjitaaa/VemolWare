@@ -4,6 +4,8 @@ import csv
 import psutil
 from datetime import datetime
 import ipaddress
+from kamene.all import *
+import netifaces
 import re
 from flask import Flask, request, render_template, redirect
 
@@ -35,6 +37,15 @@ def manage_json(data):
     with open(CONFIG_FILE, 'w+') as json_data:
         file_json.update(data)
         json.dump(file_json, json_data)
+
+
+def gather_ip_address(iface):
+    network = netifaces.ifaddresses(iface)[netifaces.AF_INET][0]['broadcast'].replace('255', '0')
+    ans,unans=srp(Ether(dst='ff:ff:ff:ff:ff:ff')/ARP(pdst=f'{network}/24'),timeout=2, verbose=0)
+    list_ip_address = []
+    for ip in ans.res:
+        list_ip_address.append(ip[0]['ARP'].pdst)
+    return list_ip_address
 
 
 def check_stage(log_file, ip_addr):
@@ -117,7 +128,8 @@ def config():
                 'local_ip': local_ip,
                 'iface': iface,
                 'target_domain': target_domain,
-                'email_address': email_address
+                'email_address': email_address,
+                'list_ip_address': gather_ip_address(iface)
             }
             
             manage_json(data)
@@ -140,16 +152,24 @@ def email():
     if request.method == 'POST':
         from1 = request.form.get('from1', '')
         from1_verbose = request.form.get('from1-verbose', '')
+        body1_email = request.form.get('body-email1', '')
         from2 = request.form.get('from2', '')
         from2_verbose = request.form.get('from2-verbose', '')
+        body2_email = request.form.get('body-email2', '')
+
         
         data = {}
         data['email_config'] = {
-            'from1': from1,
-            'from1_verbose': from1_verbose,
-            'from2': from2,
-            'from2_verbose': from2_verbose,
-            # TODO: both body emails?
+            'email1':{
+                'from': from1,
+                'from_verbose': from1_verbose,
+                'body_email': body1_email,
+            },
+            'email2':{
+                'from': from2,
+                'from_verbose': from2_verbose,
+                'body_email': body2_email,
+            }
         }
 
         manage_json(data)
