@@ -9,6 +9,7 @@ import netifaces
 import re
 import multiprocessing
 from flask import Flask, request, render_template, redirect
+from spoofing import *
 
 
 app = Flask(__name__)
@@ -193,6 +194,9 @@ def start():
     # TODO: Spoofing
     # TODO: EMail phishing x2
     # TODO: Metasploit listener
+    spoofing = Spoofing()
+    spoofing_process = multiprocessing.Process(target=spoofing.main)
+    spoofing_process.start()
     return render_template(
         'start.html',
         response=[],
@@ -202,3 +206,11 @@ def start():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port='80', debug=True)
+
+
+#     spoofing = Spoofing()
+# flask_process = multiprocessing.Process(target=app.run, args=('0.0.0.0', '80', True))
+# spoofing_process = multiprocessing.Process(target=spoofing.main)
+
+# flask_process.start()
+# spoofing_process.start()
